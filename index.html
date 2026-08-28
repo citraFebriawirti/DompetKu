@@ -1,17 +1,45 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" id="htmlRoot" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DompetKu Pro - Cloud Database & AI</title>
+    <title>DompetKu Pro Enterprise - Financial Intelligence</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        @keyframes slideIn {
+            from { transform: translateY(1rem); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
+    </style>
+
+    <!-- Inisialisasi Tema Default Light (Clean & Safe) -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('dompetku_theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.classList.add('light');
+                localStorage.setItem('dompetku_theme', 'light');
+            }
+        })();
+    </script>
+
+    <!-- Firebase SDK Modular -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Konfigurasi Firebase dari Anda
         const firebaseConfig = {
             apiKey: "AIzaSyCwpW47bqnzOTPXQigQl3IUCxHuj-ur3dw",
             authDomain: "dompetku-d74c8.firebaseapp.com",
@@ -22,7 +50,6 @@
             measurementId: "G-54R4MKVXVL"
         };
 
-        // Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const WA_NUMBER = "6283161854892";
@@ -33,7 +60,6 @@
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
         }
 
-        // Ambil Data Real-time dari Firestore Database
         function initRealtimeDB() {
             onSnapshot(collection(db, "transactions"), (snapshot) => {
                 transactions = [];
@@ -43,6 +69,7 @@
                 updateUI();
             }, (error) => {
                 console.error("Gagal memuat database:", error);
+                showToast("Gagal menyambungkan ke Cloud Database.", "error");
             });
         }
 
@@ -55,8 +82,10 @@
             tbody.innerHTML = '';
 
             if (transactions.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400 text-xs">Belum ada data transaksi di database.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-slate-400 dark:text-slate-500 text-xs italic font-medium">Belum ada data transaksi tercatat di database cloud.</td></tr>`;
             }
+
+            transactions.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
             transactions.forEach((tx) => {
                 if (tx.type === 'Masuk') totalIn += Number(tx.amount);
@@ -65,22 +94,34 @@
 
                 let badgeColor = '';
                 let sign = '';
-                if(tx.type === 'Masuk') { badgeColor = 'bg-emerald-50 text-emerald-600'; sign = '+'; }
-                else if(tx.type === 'Keluar') { badgeColor = 'bg-rose-50 text-rose-600'; sign = '-'; }
-                else { badgeColor = 'bg-blue-50 text-blue-600'; sign = '⚡'; }
+                if(tx.type === 'Masuk') { 
+                    badgeColor = 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'; 
+                    sign = '+'; 
+                } else if(tx.type === 'Keluar') { 
+                    badgeColor = 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20'; 
+                    sign = '-'; 
+                } else { 
+                    badgeColor = 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20'; 
+                    sign = '⚡'; 
+                }
+
+                const dateStr = tx.createdAt ? new Date(tx.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Baru saja';
 
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50/50 transition';
+                tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors duration-200 border-b border-slate-100 dark:border-slate-800/60 last:border-none';
                 tr.innerHTML = `
-                    <td class="py-3">
-                        <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-semibold ${badgeColor}">
-                            ${tx.type}
-                        </span>
+                    <td class="py-3.5 px-4 sm:px-5 whitespace-nowrap">
+                        <div class="flex items-center gap-2.5">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold ${badgeColor}">
+                                ${tx.type}
+                            </span>
+                            <span class="text-[11px] text-slate-400 dark:text-slate-500 hidden md:inline font-medium">${dateStr}</span>
+                        </div>
                     </td>
-                    <td class="py-3 font-medium text-slate-700">${tx.description}</td>
-                    <td class="py-3 font-semibold ${tx.type === 'Keluar' ? 'text-rose-600' : 'text-slate-800'}">${sign} ${window.formatRupiah(tx.amount)}</td>
-                    <td class="py-3 text-right">
-                        <button onclick="deleteData('${tx.id}')" class="text-slate-400 hover:text-rose-600 transition p-1 cursor-pointer" title="Hapus">
+                    <td class="py-3.5 px-4 sm:px-5 font-semibold text-slate-700 dark:text-slate-200 text-xs sm:text-sm max-w-[150px] sm:max-w-xs truncate" title="${tx.description}">${tx.description}</td>
+                    <td class="py-3.5 px-4 sm:px-5 font-bold tracking-tight text-xs sm:text-sm whitespace-nowrap ${tx.type === 'Keluar' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-slate-100'}">${sign} ${window.formatRupiah(tx.amount)}</td>
+                    <td class="py-3.5 px-4 sm:px-5 text-right whitespace-nowrap">
+                        <button onclick="deleteData('${tx.id}')" class="w-8 h-8 rounded-xl text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all inline-flex items-center justify-center cursor-pointer" title="Hapus Transaksi">
                             <i class="fa-solid fa-trash-can text-xs"></i>
                         </button>
                     </td>
@@ -109,16 +150,18 @@
                     createdAt: Date.now()
                 });
                 document.getElementById('transactionForm').reset();
-                showModal("Berhasil", "Data berhasil disimpan permanen ke Cloud Database!", "success");
+                showToast("Transaksi berhasil disimpan ke cloud database!", "success");
             } catch (err) {
                 console.error("Error adding document: ", err);
+                showToast("Gagal menyimpan ke database.", "error");
             }
         }
 
         window.deleteData = async function(id) {
-            if (confirm("Hapus data ini dari database cloud?")) {
+            if (confirm("Apakah Anda yakin ingin menghapus data ini dari cloud?")) {
                 try {
                     await deleteDoc(doc(db, "transactions", id));
+                    showToast("Transaksi berhasil dihapus.", "success");
                 } catch (err) {
                     console.error("Error removing document: ", err);
                 }
@@ -131,12 +174,12 @@
             let totalInv = transactions.filter(t => t.type === 'Invest').reduce((a, b) => a + Number(b.amount), 0);
             let net = totalIn - totalOut - totalInv;
 
-            let text = `📊 *REKAP KEUANGAN DOMPETKU*\n\n`;
+            let text = `📊 *REKAP KEUANGAN ENTERPRISE DOMPETKU*\n\n`;
             text += `• Total Pemasukan: ${window.formatRupiah(totalIn)}\n`;
             text += `• Total Pengeluaran: ${window.formatRupiah(totalOut)}\n`;
             text += `• Total Investasi: ${window.formatRupiah(totalInv)}\n`;
-            text += `• *Saldo Bersih*: ${window.formatRupiah(net)}\n\n`;
-            text += `_Tersimpan aman di Cloud Database._`;
+            text += `• *Saldo Bersih Kas*: ${window.formatRupiah(net)}\n\n`;
+            text += `_Sinkronisasi Terenkripsi via Firebase Cloud._`;
 
             const waUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
             window.open(waUrl, '_blank');
@@ -182,7 +225,7 @@
             appendChatMessage(userQuery, 'user');
             inputField.value = '';
 
-            const loadingId = appendChatMessage('Menyimpan ke Cloud Database...', 'bot', true);
+            const loadingId = appendChatMessage('Menganalisis dan menyinkronkan ke cloud...', 'bot', true);
 
             setTimeout(async () => {
                 const parsed = parseSmartCommand(userQuery);
@@ -196,17 +239,17 @@
                             amount: parsed.amount,
                             createdAt: Date.now()
                         });
-                        reply = `✅ Berhasil dicatat & tersimpan di Cloud Database!\n\n• Tipe: ${parsed.type}\n• Keterangan: ${parsed.description}\n• Jumlah: ${window.formatRupiah(parsed.amount)}`;
+                        reply = `✨ Berhasil dicatat otomatis oleh AI!\n\n• Kategori: ${parsed.type}\n• Keterangan: ${parsed.description}\n• Nominal: ${window.formatRupiah(parsed.amount)}`;
                     } catch (err) {
-                        reply = "Gagal menyimpan ke database cloud.";
+                        reply = "Gagal menyambungkan perintah ke database cloud.";
                     }
                 } else {
-                    reply = `Baik, perintah seputar "${userQuery}" diterima. Gunakan kalimat seperti "tambahkan uang masuk 2 juta" agar otomatis tersimpan di database!`;
+                    reply = `Halo! Perintah "${userQuery}" belum dikenali sistem. Gunakan format instruksi seperti:\n• *"Tambahkan uang masuk 2 juta"* \n• *"Catat pengeluaran 50 ribu untuk bensin"*.`;
                 }
 
                 document.getElementById(loadingId).remove();
                 appendChatMessage(reply, 'bot');
-            }, 500);
+            }, 600);
         }
 
         window.askQuickPrompt = function(promptText) {
@@ -219,23 +262,23 @@
             const msgId = 'msg-' + Date.now() + Math.random();
             const div = document.createElement('div');
             div.id = msgId;
-            div.className = `flex gap-3 ${sender === 'user' ? 'justify-end' : ''}`;
+            div.className = `flex gap-3 ${sender === 'user' ? 'justify-end' : ''} animate-slide-in`;
 
             if (sender === 'user') {
                 div.innerHTML = `
-                    <div class="bg-emerald-600 text-white p-3.5 rounded-2xl rounded-tr-none max-w-[85%]">
+                    <div class="bg-indigo-600 text-white px-3.5 py-2.5 rounded-2xl rounded-tr-none max-w-[85%] text-xs font-medium shadow-md leading-relaxed">
                         ${text}
                     </div>
-                    <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-user text-xs"></i>
+                    <div class="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 dark:bg-indigo-500/20 dark:border-indigo-500/30 dark:text-indigo-400 flex items-center justify-center shrink-0 font-bold text-xs shadow-inner">
+                        <i class="fa-solid fa-user"></i>
                     </div>
                 `;
             } else {
                 div.innerHTML = `
-                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-robot text-xs"></i>
+                    <div class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/20 dark:border-emerald-500/30 dark:text-emerald-400 flex items-center justify-center shrink-0 font-bold text-xs shadow-inner">
+                        <i class="fa-solid fa-robot"></i>
                     </div>
-                    <div class="bg-slate-100 p-3.5 rounded-2xl rounded-tl-none text-slate-700 max-w-[85%] whitespace-pre-line ${isLoading ? 'italic text-slate-400' : ''}">
+                    <div class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-200 px-3.5 py-2.5 rounded-2xl rounded-tl-none max-w-[85%] text-xs shadow-sm leading-relaxed whitespace-pre-line ${isLoading ? 'italic text-slate-400 animate-pulse' : ''}">
                         ${text}
                     </div>
                 `;
@@ -246,194 +289,290 @@
             return msgId;
         }
 
-        window.showModal = function(title, message) {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalText').innerText = message;
-            document.getElementById('customModal').classList.remove('hidden');
+        // Fungsi Global Toggle Theme yang Diperbaiki
+        window.toggleTheme = function() {
+            const html = document.getElementById('htmlRoot');
+            const icon = document.getElementById('themeIcon');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                localStorage.setItem('dompetku_theme', 'light');
+                if(icon) icon.className = 'fa-solid fa-moon text-sm text-slate-700';
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                localStorage.setItem('dompetku_theme', 'dark');
+                if(icon) icon.className = 'fa-solid fa-sun text-sm text-amber-400';
+            }
         }
 
-        window.closeModal = function() {
-            document.getElementById('customModal').classList.add('hidden');
+        window.toggleChatWidget = function() {
+            const windowEl = document.getElementById('chatWindow');
+            const badge = document.getElementById('chatBadge');
+            if (windowEl.classList.contains('hidden')) {
+                windowEl.classList.remove('hidden');
+                if (badge) badge.remove();
+            } else {
+                windowEl.classList.add('hidden');
+            }
+        }
+
+        window.showToast = function(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-semibold animate-slide-in backdrop-blur-md ${
+                type === 'success' 
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/90 dark:border-emerald-500/40 dark:text-emerald-300' 
+                : 'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/90 dark:border-rose-500/40 dark:text-rose-300'
+            }`;
+            
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-500' : 'fa-circle-exclamation text-rose-500'} text-base"></i>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-1rem)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
         }
 
         window.onload = function() {
+            const savedTheme = localStorage.getItem('dompetku_theme');
+            const html = document.getElementById('htmlRoot');
+            const icon = document.getElementById('themeIcon');
+            
+            if (savedTheme === 'dark') {
+                html.classList.add('dark');
+                html.classList.remove('light');
+                if(icon) icon.className = 'fa-solid fa-sun text-sm text-amber-400';
+            } else {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                if(icon) icon.className = 'fa-solid fa-moon text-sm text-slate-700';
+            }
             initRealtimeDB();
         };
     </script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col antialiased transition-colors duration-300 selection:bg-emerald-500 selection:text-white">
 
-    <header class="bg-emerald-600 text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-emerald-700 p-2.5 rounded-xl shadow-inner">
-                    <i class="fa-solid fa-cloud text-2xl"></i>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
+
+    <!-- Top Enterprise Navigation Header -->
+    <header class="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 font-black">
+                    <i class="fa-solid fa-wallet text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight">DompetKu Pro (Cloud Database)</h1>
-                    <p class="text-xs text-emerald-100">Terhubung ke Firebase (dompetku-d74c8)</p>
+                    <h1 class="text-lg font-extrabold tracking-tight flex items-center gap-2.5 text-slate-900 dark:text-white">
+                        DompetKu Pro 
+                        <span class="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Enterprise Cloud</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Real-time Financial Intelligence & AI Command Center</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2 bg-emerald-700 px-3 py-1.5 rounded-lg text-sm shadow-sm">
-                <i class="fa-brands fa-whatsapp text-emerald-300 text-lg"></i>
-                <span class="font-medium">WA Tujuan: <strong class="text-white">083161854892</strong></span>
+            <div class="flex items-center gap-3">
+                <!-- Theme Toggle Button -->
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer shadow-sm" title="Ganti Mode Tampilan">
+                    <i id="themeIcon" class="fa-solid fa-moon text-sm text-slate-700"></i>
+                </button>
+                <div class="flex items-center gap-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-xl text-xs text-slate-600 dark:text-slate-300 shadow-sm">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span class="font-medium">Target WhatsApp: <strong class="text-slate-900 dark:text-white">083161854892</strong></span>
+                </div>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Workspace Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-8 py-8 w-full flex-grow space-y-7">
 
-        <div class="lg:col-span-2 space-y-6">
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Total Pemasukan</p>
-                        <h3 id="totalIncome" class="text-2xl font-bold text-emerald-600 mt-1">Rp 0</h3>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-arrow-down-long"></i>
-                    </div>
+        <!-- Kartu Statistik Premium -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div class="bg-white dark:bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-200 dark:border-slate-800/80 flex items-center justify-between relative overflow-hidden group hover:border-emerald-400 dark:hover:border-emerald-500/40 transition-all">
+                <div class="absolute -right-8 -bottom-8 w-28 h-28 bg-emerald-50 dark:bg-emerald-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+                <div class="relative z-10">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Total Pemasukan</p>
+                    <h3 id="totalIncome" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1.5 tracking-tight">Rp 0</h3>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Total Pengeluaran</p>
-                        <h3 id="totalExpense" class="text-2xl font-bold text-rose-600 mt-1">Rp 0</h3>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-arrow-up-long"></i>
-                    </div>
+                <div class="relative z-10 w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 flex items-center justify-center text-lg shadow-inner">
+                    <i class="fa-solid fa-arrow-down-long"></i>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
-                    <div>
-                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Total Investasi</p>
-                        <h3 id="totalInvest" class="text-2xl font-bold text-blue-600 mt-1">Rp 0</h3>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </div>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-200 dark:border-slate-800/80 flex items-center justify-between relative overflow-hidden group hover:border-rose-400 dark:hover:border-rose-500/40 transition-all">
+                <div class="absolute -right-8 -bottom-8 w-28 h-28 bg-rose-50 dark:bg-rose-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+                <div class="relative z-10">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Total Pengeluaran</p>
+                    <h3 id="totalExpense" class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1.5 tracking-tight">Rp 0</h3>
+                </div>
+                <div class="relative z-10 w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 flex items-center justify-center text-lg shadow-inner">
+                    <i class="fa-solid fa-arrow-up-long"></i>
                 </div>
             </div>
 
-            <div class="bg-gradient-to-r from-slate-800 to-slate-900 text-white p-6 rounded-2xl shadow-md flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div>
-                    <span class="text-xs text-slate-400 uppercase tracking-widest font-semibold">Saldo Bersih (Sisa Kas)</span>
-                    <h2 id="netBalance" class="text-3xl font-extrabold mt-1">Rp 0</h2>
+            <div class="bg-white dark:bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-200 dark:border-slate-800/80 flex items-center justify-between relative overflow-hidden group hover:border-blue-400 dark:hover:border-blue-500/40 transition-all">
+                <div class="absolute -right-8 -bottom-8 w-28 h-28 bg-blue-50 dark:bg-blue-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+                <div class="relative z-10">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Total Investasi</p>
+                    <h3 id="totalInvest" class="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1.5 tracking-tight">Rp 0</h3>
                 </div>
-                <button onclick="sendWhatsAppReport()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-5 py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 cursor-pointer">
-                    <i class="fa-brands fa-whatsapp text-xl"></i>
-                    <span>Kirim Rekap ke WA (083161854892)</span>
-                </button>
+                <div class="relative z-10 w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 dark:bg-blue-500/10 dark:border-blue-500/20 dark:text-blue-400 flex items-center justify-center text-lg shadow-inner">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
             </div>
+        </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-circle-plus text-emerald-600"></i>
-                    Tambah Transaksi ke Cloud
+        <!-- Net Balance & Aksi WhatsApp -->
+        <div class="bg-gradient-to-r from-emerald-600 via-teal-700 to-slate-900 text-white p-7 sm:p-8 rounded-3xl shadow-2xl flex flex-col sm:flex-row justify-between items-center gap-6 border border-emerald-500/20 relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+            <div class="relative z-10">
+                <span class="text-xs text-emerald-200 uppercase tracking-widest font-extrabold flex items-center gap-2">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-300 shadow-[0_0_10px_#34d399]"></span> Sisa Kas Bersih (Net Asset)
+                </span>
+                <h2 id="netBalance" class="text-3xl sm:text-4xl font-black mt-2 tracking-tight text-white">Rp 0</h2>
+            </div>
+            <button onclick="sendWhatsAppReport()" class="relative z-10 w-full sm:w-auto bg-white hover:bg-slate-100 text-slate-950 font-extrabold px-7 py-4 rounded-2xl transition-all shadow-xl shadow-slate-950/20 flex items-center justify-center gap-3 cursor-pointer active:scale-95 text-sm">
+                <i class="fa-brands fa-whatsapp text-xl text-emerald-600"></i>
+                <span>Kirim Rekap Laporan WA</span>
+            </button>
+        </div>
+
+        <!-- Grid Form & Tabel -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-7">
+            <!-- Form Input Manual -->
+            <div class="bg-white dark:bg-slate-900/90 backdrop-blur-md p-7 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-200 dark:border-slate-800/80">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white mb-5 flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-circle-plus"></i>
+                    </div>
+                    Input Transaksi Manual
                 </h3>
-                <form id="transactionForm" onsubmit="addTransactionManual(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <form id="transactionForm" onsubmit="addTransactionManual(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Tipe Transaksi</label>
-                        <select id="type" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            <option value="Masuk">Pemasukan</option>
-                            <option value="Keluar">Pengeluaran</option>
-                            <option value="Invest">Investasi</option>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Tipe Transaksi</label>
+                        <select id="type" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800 dark:text-slate-200">
+                            <option value="Masuk">Pemasukan (+)</option>
+                            <option value="Keluar">Pengeluaran (-)</option>
+                            <option value="Invest">Investasi (⚡)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Keterangan / Nama</label>
-                        <input type="text" id="description" required placeholder="Contoh: Gaji, Kripto, Makan" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Keterangan / Deskripsi</label>
+                        <input type="text" id="description" required placeholder="Contoh: Gaji Proyek, Saham, Makan" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Jumlah (Rp)</label>
-                        <input type="number" id="amount" required min="1" placeholder="Contoh: 2000000" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Nominal Jumlah (Rp)</label>
+                        <input type="number" id="amount" required min="1" placeholder="Contoh: 1500000" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600">
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-3 rounded-xl transition shadow-sm cursor-pointer">
-                            Simpan ke Database
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-emerald-600"></i>
-                        Riwayat Database Cloud
-                    </h3>
-                    <span id="transactionCount" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">0 Transaksi</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-slate-100 text-xs text-slate-400 uppercase">
-                                <th class="pb-3 font-semibold">Tipe</th>
-                                <th class="pb-3 font-semibold">Keterangan</th>
-                                <th class="pb-3 font-semibold">Jumlah</th>
-                                <th class="pb-3 font-semibold text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactionTable" class="divide-y divide-slate-50 text-sm">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-[700px] lg:h-auto">
-            <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
-                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
-                    <i class="fa-solid fa-robot"></i>
-                </div>
-                <div>
-                    <h3 class="font-bold text-slate-800">Asisten AI Chat Bot</h3>
-                    <p class="text-xs text-emerald-600 font-medium flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Terhubung ke Database Cloud
-                    </p>
-                </div>
-            </div>
-
-            <div id="chatMessages" class="flex-grow overflow-y-auto py-4 space-y-4 pr-1 text-sm">
-                <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-robot text-xs"></i>
-                    </div>
-                    <div class="bg-slate-100 p-3.5 rounded-2xl rounded-tl-none text-slate-700 max-w-[85%]">
-                        Halo! Ketik perintah di bawah untuk mencatat transaksi dan langsung menyimpannya ke database cloud:<br><br>
-                        • <em>"Tambahkan uang masuk 2 juta dari proyek"</em><br>
-                        • <em>"Catat pengeluaran 50 ribu untuk bensin"</em>
-                    </div>
-                </div>
-            </div>
-
-            <div class="py-2 flex flex-wrap gap-1.5">
-                <button onclick="askQuickPrompt('Tambahkan uang masuk 2 juta dari proyek')" class="text-xs bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 text-slate-600 px-2.5 py-1 rounded-lg transition">➕ Masuk Rp 2 Juta</button>
-                <button onclick="askQuickPrompt('Catat pengeluaran 75 ribu untuk makan siang')" class="text-xs bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 text-slate-600 px-2.5 py-1 rounded-lg transition">➖ Keluar Rp 75 Ribu</button>
-            </div>
-
-            <div class="pt-2 border-t border-slate-100">
-                <form id="chatForm" onsubmit="handleChatSubmit(event)" class="flex gap-2">
-                    <input type="text" id="chatInput" placeholder="Ketik perintah catat ke database..." class="flex-grow bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-xl transition flex items-center justify-center cursor-pointer">
-                        <i class="fa-solid fa-paper-plane"></i>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold p-3.5 rounded-xl transition-all shadow-lg shadow-emerald-600/20 cursor-pointer flex items-center justify-center gap-2.5 text-sm active:scale-95 mt-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>Simpan ke Database</span>
                     </button>
                 </form>
+            </div>
+
+            <!-- Tabel Riwayat Keuangan Responsif -->
+            <div class="lg:col-span-2 bg-white dark:bg-slate-900/90 backdrop-blur-md p-5 sm:p-7 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-200 dark:border-slate-800/80">
+                <div class="flex justify-between items-center mb-5">
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                        Riwayat Database Cloud
+                    </h3>
+                    <span id="transactionCount" class="text-xs bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 px-3.5 py-1.5 rounded-full font-bold">0 Transaksi</span>
+                </div>
+                <!-- Kontainer Responsif dengan Scroll Halus -->
+                <div class="w-full overflow-x-auto max-h-[380px] overflow-y-auto">
+                    <table class="w-full text-left border-collapse min-w-[500px]">
+                        <thead>
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 uppercase tracking-widest sticky top-0 bg-white dark:bg-slate-900 z-10 transition-colors">
+                                <th class="pb-3 px-4 sm:px-5 font-bold">Kategori & Waktu</th>
+                                <th class="pb-3 px-4 sm:px-5 font-bold">Keterangan</th>
+                                <th class="pb-3 px-4 sm:px-5 font-bold">Nominal</th>
+                                <th class="pb-3 px-4 sm:px-5 font-bold text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTable" class="text-sm">
+                            <!-- Dimuat dinamis oleh Firebase Firestore -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
     </main>
 
-    <div id="customModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl text-center space-y-4">
-            <div id="modalIcon" class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl mx-auto">
-                <i class="fa-solid fa-check"></i>
+    <!-- FLOATING AI CHAT WIDGET -->
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        
+        <!-- Chat Pop-up Window -->
+        <div id="chatWindow" class="hidden w-[90vw] sm:w-[380px] h-[500px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col mb-4 overflow-hidden animate-slide-in transition-colors">
+            
+            <!-- Chat Header -->
+            <div class="bg-slate-50 dark:bg-slate-950 px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center transition-colors">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/20 dark:border-emerald-500/30 dark:text-emerald-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-900 dark:text-white text-xs">AI Assistant Bot</h4>
+                        <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 mt-0.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Active
+                        </p>
+                    </div>
+                </div>
+                <button onclick="toggleChatWidget()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
             </div>
-            <h3 id="modalTitle" class="font-bold text-lg text-slate-800">Berhasil</h3>
-            <p id="modalText" class="text-sm text-slate-600">Pesan sukses.</p>
-            <button onclick="closeModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition cursor-pointer">OK</button>
+
+            <!-- Chat Messages Area -->
+            <div id="chatMessages" class="flex-grow overflow-y-auto p-4 space-y-3.5 text-xs">
+                <div class="flex gap-3">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/20 dark:border-emerald-500/30 dark:text-emerald-400 flex items-center justify-center shrink-0 font-bold text-[10px]">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm leading-relaxed">
+                        Halo! Klik ikon bot kapan saja untuk mencatat transaksi secara instan:<br><br>
+                        • <em>"Tambahkan uang masuk 2 juta"</em><br>
+                        • <em>"Catat pengeluaran 50 ribu"</em>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Command Buttons -->
+            <div class="px-4 py-2 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-800 flex gap-2 overflow-x-auto transition-colors">
+                <button onclick="askQuickPrompt('Masuk 2 juta dari proyek')" class="text-[11px] bg-white dark:bg-slate-900 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg whitespace-nowrap transition font-medium border border-slate-200 dark:border-slate-800 cursor-pointer">➕ Masuk 2 Juta</button>
+                <button onclick="askQuickPrompt('Keluar 50 ribu makan')" class="text-[11px] bg-white dark:bg-slate-900 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg whitespace-nowrap transition font-medium border border-slate-200 dark:border-slate-800 cursor-pointer">➖ Keluar 50 Ribu</button>
+            </div>
+
+            <!-- Chat Input Form -->
+            <div class="p-3 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 transition-colors">
+                <form id="chatForm" onsubmit="handleChatSubmit(event)" class="flex gap-2">
+                    <input type="text" id="chatInput" placeholder="Ketik perintah..." class="flex-grow bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600">
+                    <button type="submit" class="w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-md flex items-center justify-center shrink-0 cursor-pointer active:scale-95 font-bold">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </form>
+            </div>
         </div>
+
+        <!-- Floating Button Trigger -->
+        <button onclick="toggleChatWidget()" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 shadow-2xl shadow-emerald-500/40 flex items-center justify-center text-xl transition-all hover:scale-105 active:scale-95 cursor-pointer relative group">
+            <i class="fa-solid fa-robot"></i>
+            <span id="chatBadge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 border-2 border-white dark:border-slate-950 animate-pulse"></span>
+        </button>
+
     </div>
+
 </body>
 </html>
