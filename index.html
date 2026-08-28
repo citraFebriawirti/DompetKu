@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" id="htmlRoot" class="light">
+<html lang="id" id="htmlRoot" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,19 +18,50 @@
             to { transform: translateY(0); opacity: 1; }
         }
         .animate-slide-in { animation: slideIn 0.3s ease-out forwards; }
+
+        /* Pengaturan CSS Manual untuk Tema */
+        html[data-theme="light"] {
+            background-color: #f1f5f9; /* bg-slate-100 */
+            color: #0f172a; /* text-slate-900 */
+        }
+        html[data-theme="dark"] {
+            background-color: #020617; /* bg-slate-950 */
+            color: #f8fafc; /* text-slate-50 */
+        }
+        
+        /* Tema Terang */
+        html[data-theme="light"] .theme-card { background-color: #ffffff; border-color: #e2e8f0; color: #0f172a; }
+        html[data-theme="light"] .theme-header { background-color: rgba(255, 255, 255, 0.9); border-color: #e2e8f0; }
+        html[data-theme="light"] .theme-input { background-color: #f8fafc; border-color: #cbd5e1; color: #0f172a; }
+        html[data-theme="light"] .theme-text-muted { color: #64748b; }
+        html[data-theme="light"] .theme-table-header { background-color: #ffffff; color: #64748b; border-color: #e2e8f0; }
+        html[data-theme="light"] .theme-chat-box { background-color: #ffffff; border-color: #e2e8f0; }
+        html[data-theme="light"] .theme-chat-header { background-color: #f8fafc; border-color: #e2e8f0; }
+        html[data-theme="light"] .theme-chat-input { background-color: #ffffff; border-color: #cbd5e1; color: #0f172a; }
+        html[data-theme="light"] .theme-badge-sub { background-color: #f1f5f9; border-color: #e2e8f0; color: #475569; }
+
+        /* Tema Gelap */
+        html[data-theme="dark"] .theme-card { background-color: rgba(15, 23, 42, 0.9); border-color: #1e293b; color: #f8fafc; }
+        html[data-theme="dark"] .theme-header { background-color: rgba(15, 23, 42, 0.9); border-color: #1e293b; }
+        html[data-theme="dark"] .theme-input { background-color: #020617; border-color: #1e293b; color: #f8fafc; }
+        html[data-theme="dark"] .theme-text-muted { color: #94a3b8; }
+        html[data-theme="dark"] .theme-table-header { background-color: #0f172a; color: #94a3b8; border-color: #1e293b; }
+        html[data-theme="dark"] .theme-chat-box { background-color: #0f172a; border-color: #1e293b; }
+        html[data-theme="dark"] .theme-chat-header { background-color: #020617; border-color: #1e293b; }
+        html[data-theme="dark"] .theme-chat-input { background-color: #020617; border-color: #1e293b; color: #f8fafc; }
+        html[data-theme="dark"] .theme-badge-sub { background-color: #020617; border-color: #1e293b; color: #cbd5e1; }
     </style>
 
-    <!-- Inisialisasi Tema Default Light (Clean & Safe) -->
+    <!-- Inisialisasi Mutlak: Default Awal Selalu Light -->
     <script>
         (function() {
             const savedTheme = localStorage.getItem('dompetku_theme');
-            if (savedTheme === 'dark') {
-                document.documentElement.classList.add('dark');
-                document.documentElement.classList.remove('light');
-            } else {
-                document.documentElement.classList.remove('dark');
-                document.documentElement.classList.add('light');
+            // Jika belum pernah diset sama sekali, paksa jadi 'light'
+            if (!savedTheme) {
                 localStorage.setItem('dompetku_theme', 'light');
+                document.documentElement.setAttribute('data-theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', savedTheme);
             }
         })();
     </script>
@@ -82,7 +113,7 @@
             tbody.innerHTML = '';
 
             if (transactions.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-slate-400 dark:text-slate-500 text-xs italic font-medium">Belum ada data transaksi tercatat di database cloud.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center theme-text-muted text-xs italic font-medium">Belum ada data transaksi tercatat di database cloud.</td></tr>`;
             }
 
             transactions.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -95,33 +126,33 @@
                 let badgeColor = '';
                 let sign = '';
                 if(tx.type === 'Masuk') { 
-                    badgeColor = 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'; 
+                    badgeColor = 'bg-emerald-50 text-emerald-700 border border-emerald-200'; 
                     sign = '+'; 
                 } else if(tx.type === 'Keluar') { 
-                    badgeColor = 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20'; 
+                    badgeColor = 'bg-rose-50 text-rose-700 border border-rose-200'; 
                     sign = '-'; 
                 } else { 
-                    badgeColor = 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20'; 
+                    badgeColor = 'bg-blue-50 text-blue-700 border border-blue-200'; 
                     sign = '⚡'; 
                 }
 
                 const dateStr = tx.createdAt ? new Date(tx.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Baru saja';
 
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors duration-200 border-b border-slate-100 dark:border-slate-800/60 last:border-none';
+                tr.className = 'hover:bg-slate-50/50 transition-colors duration-200 border-b border-slate-100 dark:border-slate-800/60 last:border-none';
                 tr.innerHTML = `
                     <td class="py-3.5 px-4 sm:px-5 whitespace-nowrap">
                         <div class="flex items-center gap-2.5">
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold ${badgeColor}">
                                 ${tx.type}
                             </span>
-                            <span class="text-[11px] text-slate-400 dark:text-slate-500 hidden md:inline font-medium">${dateStr}</span>
+                            <span class="text-[11px] theme-text-muted hidden md:inline font-medium">${dateStr}</span>
                         </div>
                     </td>
-                    <td class="py-3.5 px-4 sm:px-5 font-semibold text-slate-700 dark:text-slate-200 text-xs sm:text-sm max-w-[150px] sm:max-w-xs truncate" title="${tx.description}">${tx.description}</td>
-                    <td class="py-3.5 px-4 sm:px-5 font-bold tracking-tight text-xs sm:text-sm whitespace-nowrap ${tx.type === 'Keluar' ? 'text-rose-600 dark:text-rose-400' : 'text-slate-800 dark:text-slate-100'}">${sign} ${window.formatRupiah(tx.amount)}</td>
+                    <td class="py-3.5 px-4 sm:px-5 font-semibold text-xs sm:text-sm max-w-[150px] sm:max-w-xs truncate" title="${tx.description}">${tx.description}</td>
+                    <td class="py-3.5 px-4 sm:px-5 font-bold tracking-tight text-xs sm:text-sm whitespace-nowrap ${tx.type === 'Keluar' ? 'text-rose-600 dark:text-rose-400' : ''}">${sign} ${window.formatRupiah(tx.amount)}</td>
                     <td class="py-3.5 px-4 sm:px-5 text-right whitespace-nowrap">
-                        <button onclick="deleteData('${tx.id}')" class="w-8 h-8 rounded-xl text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all inline-flex items-center justify-center cursor-pointer" title="Hapus Transaksi">
+                        <button onclick="deleteData('${tx.id}')" class="w-8 h-8 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all inline-flex items-center justify-center cursor-pointer" title="Hapus Transaksi">
                             <i class="fa-solid fa-trash-can text-xs"></i>
                         </button>
                     </td>
@@ -269,16 +300,16 @@
                     <div class="bg-indigo-600 text-white px-3.5 py-2.5 rounded-2xl rounded-tr-none max-w-[85%] text-xs font-medium shadow-md leading-relaxed">
                         ${text}
                     </div>
-                    <div class="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 dark:bg-indigo-500/20 dark:border-indigo-500/30 dark:text-indigo-400 flex items-center justify-center shrink-0 font-bold text-xs shadow-inner">
+                    <div class="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center shrink-0 font-bold text-xs shadow-inner">
                         <i class="fa-solid fa-user"></i>
                     </div>
                 `;
             } else {
                 div.innerHTML = `
-                    <div class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/20 dark:border-emerald-500/30 dark:text-emerald-400 flex items-center justify-center shrink-0 font-bold text-xs shadow-inner">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-xs shadow-inner">
                         <i class="fa-solid fa-robot"></i>
                     </div>
-                    <div class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-200 px-3.5 py-2.5 rounded-2xl rounded-tl-none max-w-[85%] text-xs shadow-sm leading-relaxed whitespace-pre-line ${isLoading ? 'italic text-slate-400 animate-pulse' : ''}">
+                    <div class="theme-chat-box border text-xs p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm leading-relaxed whitespace-pre-line ${isLoading ? 'italic theme-text-muted animate-pulse' : ''}">
                         ${text}
                     </div>
                 `;
@@ -289,19 +320,18 @@
             return msgId;
         }
 
-        // Fungsi Global Toggle Theme yang Diperbaiki
+        // Fungsi Global Toggle Theme Instan
         window.toggleTheme = function() {
-            const html = document.getElementById('htmlRoot');
+            const html = document.documentElement;
             const icon = document.getElementById('themeIcon');
+            const currentTheme = html.getAttribute('data-theme');
             
-            if (html.classList.contains('dark')) {
-                html.classList.remove('dark');
-                html.classList.add('light');
+            if (currentTheme === 'dark') {
+                html.setAttribute('data-theme', 'light');
                 localStorage.setItem('dompetku_theme', 'light');
                 if(icon) icon.className = 'fa-solid fa-moon text-sm text-slate-700';
             } else {
-                html.classList.remove('light');
-                html.classList.add('dark');
+                html.setAttribute('data-theme', 'dark');
                 localStorage.setItem('dompetku_theme', 'dark');
                 if(icon) icon.className = 'fa-solid fa-sun text-sm text-amber-400';
             }
@@ -323,8 +353,8 @@
             const toast = document.createElement('div');
             toast.className = `flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-sm font-semibold animate-slide-in backdrop-blur-md ${
                 type === 'success' 
-                ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/90 dark:border-emerald-500/40 dark:text-emerald-300' 
-                : 'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/90 dark:border-rose-500/40 dark:text-rose-300'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+                : 'bg-rose-50 border-rose-200 text-rose-800'
             }`;
             
             toast.innerHTML = `
@@ -341,51 +371,46 @@
         }
 
         window.onload = function() {
-            const savedTheme = localStorage.getItem('dompetku_theme');
-            const html = document.getElementById('htmlRoot');
+            const savedTheme = localStorage.getItem('dompetku_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
             const icon = document.getElementById('themeIcon');
-            
             if (savedTheme === 'dark') {
-                html.classList.add('dark');
-                html.classList.remove('light');
                 if(icon) icon.className = 'fa-solid fa-sun text-sm text-amber-400';
             } else {
-                html.classList.remove('dark');
-                html.classList.add('light');
                 if(icon) icon.className = 'fa-solid fa-moon text-sm text-slate-700';
             }
             initRealtimeDB();
         };
     </script>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col antialiased transition-colors duration-300 selection:bg-emerald-500 selection:text-white">
+<body class="min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">
 
     <!-- Toast Container -->
     <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
 
     <!-- Top Enterprise Navigation Header -->
-    <header class="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 transition-colors duration-300">
+    <header class="theme-header backdrop-blur-xl border-b sticky top-0 z-40 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 font-black">
                     <i class="fa-solid fa-wallet text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-lg font-extrabold tracking-tight flex items-center gap-2.5 text-slate-900 dark:text-white">
+                    <h1 class="text-lg font-extrabold tracking-tight flex items-center gap-2.5">
                         DompetKu Pro 
-                        <span class="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Enterprise Cloud</span>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Enterprise Cloud</span>
                     </h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Real-time Financial Intelligence & AI Command Center</p>
+                    <p class="text-xs theme-text-muted font-medium">Real-time Financial Intelligence & AI Command Center</p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
                 <!-- Theme Toggle Button -->
-                <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer shadow-sm" title="Ganti Mode Tampilan">
-                    <i id="themeIcon" class="fa-solid fa-moon text-sm text-slate-700"></i>
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl theme-card border flex items-center justify-center hover:opacity-80 transition cursor-pointer shadow-sm" title="Ganti Mode Tampilan">
+                    <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
                 </button>
-                <div class="flex items-center gap-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-xl text-xs text-slate-600 dark:text-slate-300 shadow-sm">
+                <div class="flex items-center gap-3 theme-card border px-4 py-2.5 rounded-xl text-xs shadow-sm">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span class="font-medium">Target WhatsApp: <strong class="text-slate-900 dark:text-white">083161854892</strong></span>
+                    <span class="font-medium">Target WhatsApp: <strong class="">083161854892</strong></span>
                 </div>
             </div>
         </div>
@@ -396,35 +421,35 @@
 
         <!-- Kartu Statistik Premium -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <div class="bg-white dark:bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-200 dark:border-slate-800/80 flex items-center justify-between relative overflow-hidden group hover:border-emerald-400 dark:hover:border-emerald-500/40 transition-all">
-                <div class="absolute -right-8 -bottom-8 w-28 h-28 bg-emerald-50 dark:bg-emerald-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+            <div class="theme-card p-6 rounded-3xl shadow-xl border flex items-center justify-between relative overflow-hidden group hover:border-emerald-400 transition-all">
+                <div class="absolute -right-8 -bottom-8 w-28 h-28 bg-emerald-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
                 <div class="relative z-10">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Total Pemasukan</p>
-                    <h3 id="totalIncome" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1.5 tracking-tight">Rp 0</h3>
+                    <p class="text-[11px] font-bold theme-text-muted uppercase tracking-widest">Total Pemasukan</p>
+                    <h3 id="totalIncome" class="text-2xl font-black text-emerald-600 mt-1.5 tracking-tight">Rp 0</h3>
                 </div>
-                <div class="relative z-10 w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 flex items-center justify-center text-lg shadow-inner">
+                <div class="relative z-10 w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center text-lg shadow-inner">
                     <i class="fa-solid fa-arrow-down-long"></i>
                 </div>
             </div>
             
-            <div class="bg-white dark:bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-200 dark:border-slate-800/80 flex items-center justify-between relative overflow-hidden group hover:border-rose-400 dark:hover:border-rose-500/40 transition-all">
-                <div class="absolute -right-8 -bottom-8 w-28 h-28 bg-rose-50 dark:bg-rose-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+            <div class="theme-card p-6 rounded-3xl shadow-xl border flex items-center justify-between relative overflow-hidden group hover:border-rose-400 transition-all">
+                <div class="absolute -right-8 -bottom-8 w-28 h-28 bg-rose-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
                 <div class="relative z-10">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Total Pengeluaran</p>
-                    <h3 id="totalExpense" class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1.5 tracking-tight">Rp 0</h3>
+                    <p class="text-[11px] font-bold theme-text-muted uppercase tracking-widest">Total Pengeluaran</p>
+                    <h3 id="totalExpense" class="text-2xl font-black text-rose-600 mt-1.5 tracking-tight">Rp 0</h3>
                 </div>
-                <div class="relative z-10 w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 flex items-center justify-center text-lg shadow-inner">
+                <div class="relative z-10 w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 flex items-center justify-center text-lg shadow-inner">
                     <i class="fa-solid fa-arrow-up-long"></i>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-200 dark:border-slate-800/80 flex items-center justify-between relative overflow-hidden group hover:border-blue-400 dark:hover:border-blue-500/40 transition-all">
-                <div class="absolute -right-8 -bottom-8 w-28 h-28 bg-blue-50 dark:bg-blue-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
+            <div class="theme-card p-6 rounded-3xl shadow-xl border flex items-center justify-between relative overflow-hidden group hover:border-blue-400 transition-all">
+                <div class="absolute -right-8 -bottom-8 w-28 h-28 bg-blue-500/5 rounded-full group-hover:scale-125 transition-transform duration-500"></div>
                 <div class="relative z-10">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Total Investasi</p>
-                    <h3 id="totalInvest" class="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1.5 tracking-tight">Rp 0</h3>
+                    <p class="text-[11px] font-bold theme-text-muted uppercase tracking-widest">Total Investasi</p>
+                    <h3 id="totalInvest" class="text-2xl font-black text-blue-600 mt-1.5 tracking-tight">Rp 0</h3>
                 </div>
-                <div class="relative z-10 w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 dark:bg-blue-500/10 dark:border-blue-500/20 dark:text-blue-400 flex items-center justify-center text-lg shadow-inner">
+                <div class="relative z-10 w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-600 flex items-center justify-center text-lg shadow-inner">
                     <i class="fa-solid fa-chart-line"></i>
                 </div>
             </div>
@@ -448,29 +473,29 @@
         <!-- Grid Form & Tabel -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-7">
             <!-- Form Input Manual -->
-            <div class="bg-white dark:bg-slate-900/90 backdrop-blur-md p-7 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-200 dark:border-slate-800/80">
-                <h3 class="text-base font-bold text-slate-900 dark:text-white mb-5 flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 flex items-center justify-center text-sm">
+            <div class="theme-card p-7 rounded-3xl shadow-xl border">
+                <h3 class="text-base font-bold mb-5 flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center text-sm">
                         <i class="fa-solid fa-circle-plus"></i>
                     </div>
                     Input Transaksi Manual
                 </h3>
                 <form id="transactionForm" onsubmit="addTransactionManual(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Tipe Transaksi</label>
-                        <select id="type" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800 dark:text-slate-200">
+                        <label class="block text-xs font-semibold theme-text-muted mb-2">Tipe Transaksi</label>
+                        <select id="type" class="w-full theme-input border rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold">
                             <option value="Masuk">Pemasukan (+)</option>
                             <option value="Keluar">Pengeluaran (-)</option>
                             <option value="Invest">Investasi (⚡)</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Keterangan / Deskripsi</label>
-                        <input type="text" id="description" required placeholder="Contoh: Gaji Proyek, Saham, Makan" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600">
+                        <label class="block text-xs font-semibold theme-text-muted mb-2">Keterangan / Deskripsi</label>
+                        <input type="text" id="description" required placeholder="Contoh: Gaji Proyek, Saham, Makan" class="w-full theme-input border rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold placeholder-slate-400">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Nominal Jumlah (Rp)</label>
-                        <input type="number" id="amount" required min="1" placeholder="Contoh: 1500000" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600">
+                        <label class="block text-xs font-semibold theme-text-muted mb-2">Nominal Jumlah (Rp)</label>
+                        <input type="number" id="amount" required min="1" placeholder="Contoh: 1500000" class="w-full theme-input border rounded-xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold placeholder-slate-400">
                     </div>
                     <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold p-3.5 rounded-xl transition-all shadow-lg shadow-emerald-600/20 cursor-pointer flex items-center justify-center gap-2.5 text-sm active:scale-95 mt-2">
                         <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -480,21 +505,21 @@
             </div>
 
             <!-- Tabel Riwayat Keuangan Responsif -->
-            <div class="lg:col-span-2 bg-white dark:bg-slate-900/90 backdrop-blur-md p-5 sm:p-7 rounded-3xl shadow-xl shadow-slate-200/60 dark:shadow-none border border-slate-200 dark:border-slate-800/80">
+            <div class="lg:col-span-2 theme-card p-5 sm:p-7 rounded-3xl shadow-xl border">
                 <div class="flex justify-between items-center mb-5">
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 flex items-center justify-center text-sm">
+                    <h3 class="text-base font-bold flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center text-sm">
                             <i class="fa-solid fa-list-check"></i>
                         </div>
                         Riwayat Database Cloud
                     </h3>
-                    <span id="transactionCount" class="text-xs bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 px-3.5 py-1.5 rounded-full font-bold">0 Transaksi</span>
+                    <span id="transactionCount" class="text-xs theme-badge-sub border px-3.5 py-1.5 rounded-full font-bold">0 Transaksi</span>
                 </div>
                 <!-- Kontainer Responsif dengan Scroll Halus -->
                 <div class="w-full overflow-x-auto max-h-[380px] overflow-y-auto">
                     <table class="w-full text-left border-collapse min-w-[500px]">
                         <thead>
-                            <tr class="border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 uppercase tracking-widest sticky top-0 bg-white dark:bg-slate-900 z-10 transition-colors">
+                            <tr class="border-b theme-table-header text-[11px] uppercase tracking-widest sticky top-0 z-10 transition-colors">
                                 <th class="pb-3 px-4 sm:px-5 font-bold">Kategori & Waktu</th>
                                 <th class="pb-3 px-4 sm:px-5 font-bold">Keterangan</th>
                                 <th class="pb-3 px-4 sm:px-5 font-bold">Nominal</th>
@@ -515,22 +540,22 @@
     <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
         
         <!-- Chat Pop-up Window -->
-        <div id="chatWindow" class="hidden w-[90vw] sm:w-[380px] h-[500px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl flex flex-col mb-4 overflow-hidden animate-slide-in transition-colors">
+        <div id="chatWindow" class="hidden w-[90vw] sm:w-[380px] h-[500px] theme-card border rounded-3xl shadow-2xl flex flex-col mb-4 overflow-hidden animate-slide-in transition-colors">
             
             <!-- Chat Header -->
-            <div class="bg-slate-50 dark:bg-slate-950 px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center transition-colors">
+            <div class="theme-chat-header px-5 py-4 border-b flex justify-between items-center transition-colors">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/20 dark:border-emerald-500/30 dark:text-emerald-400 flex items-center justify-center font-bold">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center font-bold">
                         <i class="fa-solid fa-robot"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-slate-900 dark:text-white text-xs">AI Assistant Bot</h4>
-                        <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 mt-0.5">
+                        <h4 class="font-bold text-xs">AI Assistant Bot</h4>
+                        <p class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Active
                         </p>
                     </div>
                 </div>
-                <button onclick="toggleChatWidget()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
+                <button onclick="toggleChatWidget()" class="w-8 h-8 rounded-lg theme-text-muted hover:opacity-100 flex items-center justify-center transition cursor-pointer">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
@@ -538,10 +563,10 @@
             <!-- Chat Messages Area -->
             <div id="chatMessages" class="flex-grow overflow-y-auto p-4 space-y-3.5 text-xs">
                 <div class="flex gap-3">
-                    <div class="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 dark:bg-emerald-500/20 dark:border-emerald-500/30 dark:text-emerald-400 flex items-center justify-center shrink-0 font-bold text-[10px]">
+                    <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center shrink-0 font-bold text-[10px]">
                         <i class="fa-solid fa-robot"></i>
                     </div>
-                    <div class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm leading-relaxed">
+                    <div class="theme-chat-box border p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm leading-relaxed">
                         Halo! Klik ikon bot kapan saja untuk mencatat transaksi secara instan:<br><br>
                         • <em>"Tambahkan uang masuk 2 juta"</em><br>
                         • <em>"Catat pengeluaran 50 ribu"</em>
@@ -550,15 +575,15 @@
             </div>
 
             <!-- Quick Command Buttons -->
-            <div class="px-4 py-2 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-800 flex gap-2 overflow-x-auto transition-colors">
-                <button onclick="askQuickPrompt('Masuk 2 juta dari proyek')" class="text-[11px] bg-white dark:bg-slate-900 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg whitespace-nowrap transition font-medium border border-slate-200 dark:border-slate-800 cursor-pointer">➕ Masuk 2 Juta</button>
-                <button onclick="askQuickPrompt('Keluar 50 ribu makan')" class="text-[11px] bg-white dark:bg-slate-900 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:text-emerald-400 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg whitespace-nowrap transition font-medium border border-slate-200 dark:border-slate-800 cursor-pointer">➖ Keluar 50 Ribu</button>
+            <div class="px-4 py-2 theme-chat-header border-t flex gap-2 overflow-x-auto transition-colors">
+                <button onclick="askQuickPrompt('Masuk 2 juta dari proyek')" class="text-[11px] theme-card hover:opacity-80 px-3 py-1.5 rounded-lg whitespace-nowrap transition font-medium border cursor-pointer">➕ Masuk 2 Juta</button>
+                <button onclick="askQuickPrompt('Keluar 50 ribu makan')" class="text-[11px] theme-card hover:opacity-80 px-3 py-1.5 rounded-lg whitespace-nowrap transition font-medium border cursor-pointer">➖ Keluar 50 Ribu</button>
             </div>
 
             <!-- Chat Input Form -->
-            <div class="p-3 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 transition-colors">
+            <div class="p-3 theme-chat-header border-t transition-colors">
                 <form id="chatForm" onsubmit="handleChatSubmit(event)" class="flex gap-2">
-                    <input type="text" id="chatInput" placeholder="Ketik perintah..." class="flex-grow bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600">
+                    <input type="text" id="chatInput" placeholder="Ketik perintah..." class="flex-grow theme-chat-input border rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium placeholder-slate-400">
                     <button type="submit" class="w-10 h-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-md flex items-center justify-center shrink-0 cursor-pointer active:scale-95 font-bold">
                         <i class="fa-solid fa-paper-plane text-xs"></i>
                     </button>
@@ -569,7 +594,7 @@
         <!-- Floating Button Trigger -->
         <button onclick="toggleChatWidget()" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 shadow-2xl shadow-emerald-500/40 flex items-center justify-center text-xl transition-all hover:scale-105 active:scale-95 cursor-pointer relative group">
             <i class="fa-solid fa-robot"></i>
-            <span id="chatBadge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 border-2 border-white dark:border-slate-950 animate-pulse"></span>
+            <span id="chatBadge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 border-2 border-white animate-pulse"></span>
         </button>
 
     </div>
