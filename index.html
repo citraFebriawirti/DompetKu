@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DompetKu Pro - Permanent Storage & AI</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+    <header class="bg-emerald-600 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-emerald-700 p-2.5 rounded-xl shadow-inner">
+                    <i class="fa-solid fa-wallet text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">DompetKu Pro</h1>
+                    <p class="text-xs text-emerald-100">Data aman tersimpan otomatis, tidak hilang saat di-refresh!</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 bg-emerald-700 px-3 py-1.5 rounded-lg text-sm shadow-sm">
+                <i class="fa-brands fa-whatsapp text-emerald-300 text-lg"></i>
+                <span class="font-medium">WA Tujuan: <strong class="text-white">083161854892</strong></span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <div class="lg:col-span-2 space-y-6">
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Total Pemasukan</p>
+                        <h3 id="totalIncome" class="text-2xl font-bold text-emerald-600 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-arrow-down-long"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Total Pengeluaran</p>
+                        <h3 id="totalExpense" class="text-2xl font-bold text-rose-600 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-arrow-up-long"></i>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Total Investasi</p>
+                        <h3 id="totalInvest" class="text-2xl font-bold text-blue-600 mt-1">Rp 0</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 text-white p-6 rounded-2xl shadow-md flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <span class="text-xs text-slate-400 uppercase tracking-widest font-semibold">Saldo Bersih (Sisa Kas)</span>
+                    <h2 id="netBalance" class="text-3xl font-extrabold mt-1">Rp 0</h2>
+                </div>
+                <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <button onclick="sendWhatsAppReport()" class="flex-grow sm:flex-grow-0 bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-4 py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 cursor-pointer">
+                        <i class="fa-brands fa-whatsapp text-xl"></i>
+                        <span>Kirim WA</span>
+                    </button>
+                    <button onclick="resetData()" class="bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 px-3 py-3 rounded-xl transition text-xs font-semibold cursor-pointer" title="Reset Semua Data">
+                        <i class="fa-solid fa-rotate-right"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-plus text-emerald-600"></i>
+                    Tambah Transaksi Manual
+                </h3>
+                <form id="transactionForm" onsubmit="addTransactionManual(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Tipe Transaksi</label>
+                        <select id="type" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="Masuk">Pemasukan</option>
+                            <option value="Keluar">Pengeluaran</option>
+                            <option value="Invest">Investasi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Keterangan / Nama</label>
+                        <input type="text" id="description" required placeholder="Contoh: Gaji, Kripto, Makan" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Jumlah (Rp)</label>
+                        <input type="number" id="amount" required min="1" placeholder="Contoh: 2000000" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-3 rounded-xl transition shadow-sm cursor-pointer">
+                            Simpan Transaksi
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-emerald-600"></i>
+                        Riwayat Keuangan
+                    </h3>
+                    <span id="transactionCount" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium">0 Transaksi</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-100 text-xs text-slate-400 uppercase">
+                                <th class="pb-3 font-semibold">Tipe</th>
+                                <th class="pb-3 font-semibold">Keterangan</th>
+                                <th class="pb-3 font-semibold">Jumlah</th>
+                                <th class="pb-3 font-semibold text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionTable" class="divide-y divide-slate-50 text-sm">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-[700px] lg:h-auto">
+            <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-slate-800">Asisten AI Auto-Input</h3>
+                    <p class="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Data tersimpan otomatis di browser
+                    </p>
+                </div>
+            </div>
+
+            <div id="chatMessages" class="flex-grow overflow-y-auto py-4 space-y-4 pr-1 text-sm">
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-robot text-xs"></i>
+                    </div>
+                    <div class="bg-slate-100 p-3.5 rounded-2xl rounded-tl-none text-slate-700 max-w-[85%]">
+                        Halo! Ketik perintah untuk mencatat transaksi secara otomatis. Data aman dan tidak akan hilang meskipun di-refresh:<br><br>
+                        • <em>"Tambahkan uang masuk 2 juta dari proyek"</em><br>
+                        • <em>"Catat pengeluaran 50 ribu untuk bensin"</em>
+                    </div>
+                </div>
+            </div>
+
+            <div class="py-2 flex flex-wrap gap-1.5">
+                <button onclick="askQuickPrompt('Tambahkan uang masuk 2 juta dari proyek')" class="text-xs bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 text-slate-600 px-2.5 py-1 rounded-lg transition">➕ Masuk Rp 2 Juta</button>
+                <button onclick="askQuickPrompt('Catat pengeluaran 75 ribu untuk makan siang')" class="text-xs bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 text-slate-600 px-2.5 py-1 rounded-lg transition">➖ Keluar Rp 75 Ribu</button>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100">
+                <form id="chatForm" onsubmit="handleChatSubmit(event)" class="flex gap-2">
+                    <input type="text" id="chatInput" placeholder="Ketik perintah catat keuangan..." class="flex-grow bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-xl transition flex items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="customModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl text-center space-y-4">
+            <div id="modalIcon" class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl mx-auto">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 id="modalTitle" class="font-bold text-lg text-slate-800">Berhasil</h3>
+            <p id="modalText" class="text-sm text-slate-600">Pesan sukses.</p>
+            <button onclick="closeModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition cursor-pointer">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const WA_NUMBER = "6283161854892";
+
+        // Inisialisasi Data dari LocalStorage (jika kosong, gunakan data default)
+        let transactions = JSON.parse(localStorage.getItem('dompetku_transactions')) || [
+            { id: 1, type: "Masuk", description: "Gaji Bulanan", amount: 7500000 },
+            { id: 2, type: "Keluar", description: "Belanja Bulanan", amount: 2000000 },
+            { id: 3, type: "Invest", description: "Reksa Dana & Saham", amount: 1500000 }
+        ];
+
+        // Simpan data setiap kali ada perubahan
+        function saveToStorage() {
+            localStorage.setItem('dompetku_transactions', JSON.stringify(transactions));
+        }
+
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
+        }
+
+        function updateUI() {
+            let totalIn = 0;
+            let totalOut = 0;
+            let totalInv = 0;
+
+            const tbody = document.getElementById('transactionTable');
+            tbody.innerHTML = '';
+
+            transactions.forEach((tx) => {
+                if (tx.type === 'Masuk') totalIn += tx.amount;
+                else if (tx.type === 'Keluar') totalOut += tx.amount;
+                else if (tx.type === 'Invest') totalInv += tx.amount;
+
+                let badgeColor = '';
+                let sign = '';
+                if(tx.type === 'Masuk') { badgeColor = 'bg-emerald-50 text-emerald-600'; sign = '+'; }
+                else if(tx.type === 'Keluar') { badgeColor = 'bg-rose-50 text-rose-600'; sign = '-'; }
+                else { badgeColor = 'bg-blue-50 text-blue-600'; sign = '⚡'; }
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/50 transition';
+                tr.innerHTML = `
+                    <td class="py-3">
+                        <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-semibold ${badgeColor}">
+                            ${tx.type}
+                        </span>
+                    </td>
+                    <td class="py-3 font-medium text-slate-700">${tx.description}</td>
+                    <td class="py-3 font-semibold ${tx.type === 'Keluar' ? 'text-rose-600' : 'text-slate-800'}">${sign} ${formatRupiah(tx.amount)}</td>
+                    <td class="py-3 text-right">
+                        <button onclick="deleteTransaction(${tx.id})" class="text-slate-400 hover:text-rose-600 transition p-1 cursor-pointer" title="Hapus">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('totalIncome').innerText = formatRupiah(totalIn);
+            document.getElementById('totalExpense').innerText = formatRupiah(totalOut);
+            document.getElementById('totalInvest').innerText = formatRupiah(totalInv);
+            document.getElementById('netBalance').innerText = formatRupiah(totalIn - totalOut - totalInv);
+            document.getElementById('transactionCount').innerText = `${transactions.length} Transaksi`;
+            
+            saveToStorage(); // Simpan otomatis ke penyimpanan permanen browser
+        }
+
+        function addTransactionManual(e) {
+            e.preventDefault();
+            const type = document.getElementById('type').value;
+            const description = document.getElementById('description').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            transactions.push({ id: Date.now(), type, description, amount });
+            document.getElementById('transactionForm').reset();
+            updateUI();
+            showModal("Berhasil", "Transaksi baru berhasil disimpan permanen!", "success");
+        }
+
+        function deleteTransaction(id) {
+            transactions = transactions.filter(tx => tx.id !== id);
+            updateUI();
+        }
+
+        function resetData() {
+            if (confirm("Apakah Anda yakin ingin meressemua data keuangan kembali ke awal?")) {
+                localStorage.removeItem('dompetku_transactions');
+                transactions = [
+                    { id: 1, type: "Masuk", description: "Gaji Bulanan", amount: 7500000 },
+                    { id: 2, type: "Keluar", description: "Belanja Bulanan", amount: 2000000 },
+                    { id: 3, type: "Invest", description: "Reksa Dana & Saham", amount: 1500000 }
+                ];
+                updateUI();
+                showModal("Reset Berhasil", "Data telah dikembalikan ke pengaturan awal.", "info");
+            }
+        }
+
+        function sendWhatsAppReport() {
+            let totalIn = transactions.filter(t => t.type === 'Masuk').reduce((a, b) => a + b.amount, 0);
+            let totalOut = transactions.filter(t => t.type === 'Keluar').reduce((a, b) => a + b.amount, 0);
+            let totalInv = transactions.filter(t => t.type === 'Invest').reduce((a, b) => a + b.amount, 0);
+            let net = totalIn - totalOut - totalInv;
+
+            let text = `📊 *REKAP KEUANGAN DOMPETKU*\n\n`;
+            text += `• Total Pemasukan: ${formatRupiah(totalIn)}\n`;
+            text += `• Total Pengeluaran: ${formatRupiah(totalOut)}\n`;
+            text += `• Total Investasi: ${formatRupiah(totalInv)}\n`;
+            text += `• *Saldo Bersih*: ${formatRupiah(net)}\n\n`;
+            text += `_Tersimpan aman & otomatis via DompetKu Pro._`;
+
+            const waUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
+            window.open(waUrl, '_blank');
+        }
+
+        function showModal(title, message) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalText').innerText = message;
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        function askQuickPrompt(promptText) {
+            document.getElementById('chatInput').value = promptText;
+            document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Smart Local Command Parser
+        function parseSmartCommand(query) {
+            const q = query.toLowerCase();
+            let type = "";
+            
+            if (q.includes("masuk") || q.includes("pendapatan") || q.includes("gaji") || q.includes("tambahkan uang masuk")) {
+                type = "Masuk";
+            } else if (q.includes("keluar") || q.includes("beli") || q.includes("bayar") || q.includes("makan")) {
+                type = "Keluar";
+            } else if (q.includes("invest") || q.includes("saham") || q.includes("reksa") || q.includes("crypto") || q.includes("kripto")) {
+                type = "Invest";
+            }
+
+            if (!type) return null;
+
+            let amount = 0;
+            if (q.includes("juta")) {
+                const match = q.match(/(\d+[\d\.]*)\s*juta/);
+                if (match) amount = parseFloat(match[1].replace('.', '')) * 1000000;
+            } else if (q.includes("ribu")) {
+                const match = q.match(/(\d+[\d\.]*)\s*ribu/);
+                if (match) amount = parseFloat(match[1].replace('.', '')) * 1000;
+            } else {
+                const match = q.match(/\d+/g);
+                if (match) amount = parseFloat(match.join(''));
+            }
+
+            if (!amount || isNaN(amount)) return null;
+
+            return {
+                type: type,
+                description: query,
+                amount: amount
+            };
+        }
+
+        function handleChatSubmit(e) {
+            e.preventDefault();
+            const inputField = document.getElementById('chatInput');
+            const userQuery = inputField.value.trim();
+            if (!userQuery) return;
+
+            appendChatMessage(userQuery, 'user');
+            inputField.value = '';
+
+            const loadingId = appendChatMessage('Memproses & menyimpan permanen...', 'bot', true);
+
+            setTimeout(() => {
+                const parsed = parseSmartCommand(userQuery);
+                let reply = "";
+
+                if (parsed) {
+                    transactions.push({
+                        id: Date.now(),
+                        type: parsed.type,
+                        description: parsed.description,
+                        amount: parsed.amount
+                    });
+                    updateUI(); // Memperbarui UI sekaligus menyimpan ke localStorage secara permanen
+                    
+                    reply = `✅ Berhasil dicatat & tersimpan permanen!\n\n• Tipe: ${parsed.type}\n• Keterangan: ${parsed.description}\n• Jumlah: ${formatRupiah(parsed.amount)}`;
+                } else {
+                    reply = `Baik, data seputar "${userQuery}" dipahami. Silakan masukkan perintah dengan format nominal (contoh: "tambahkan uang masuk 2 juta") agar otomatis tersimpan permanen!`;
+                }
+
+                document.getElementById(loadingId).remove();
+                appendChatMessage(reply, 'bot');
+            }, 500);
+        }
+
+        function appendChatMessage(text, sender, isLoading = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const msgId = 'msg-' + Date.now() + Math.random();
+            const div = document.createElement('div');
+            div.id = msgId;
+            div.className = `flex gap-3 ${sender === 'user' ? 'justify-end' : ''}`;
+
+            if (sender === 'user') {
+                div.innerHTML = `
+                    <div class="bg-emerald-600 text-white p-3.5 rounded-2xl rounded-tr-none max-w-[85%]">
+                        ${text}
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-user text-xs"></i>
+                    </div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-robot text-xs"></i>
+                    </div>
+                    <div class="bg-slate-100 p-3.5 rounded-2xl rounded-tl-none text-slate-700 max-w-[85%] whitespace-pre-line ${isLoading ? 'italic text-slate-400' : ''}">
+                        ${text}
+                    </div>
+                `;
+            }
+
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return msgId;
+        }
+
+        window.onload = function() {
+            updateUI();
+        };
+    </script>
+</body>
+</html>
